@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>819--咨询管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <style>
+  .layui-layer-content{
+    
+  }
+    .banner_list{
+    }
+    .banner_left{
+    float: left;
+    width: 40%;
+    margin-right: 10%;
+    background-color: #F0F0F0;
+    overflow-y:scroll;
+    }
+    .banner_right{
+    float: left;
+    width: 40%;
+    background-color:#F0F0F0;
+    overflow-y:scroll;
+    }
+  .red{
+    color: #1E9FFF
+  }
+  </style>
+  <body>
+    <div class="x-body">
+      <div class="layui-row">
+        <div class="layui-form layui-col-md12 x-so">
+          <span>发布时间</span>
+          <input class="layui-input" placeholder="开始日" name="start" id="start">
+          <span>至</span>
+          <input class="layui-input" placeholder="截止日" name="end" id="end">
+          <span style="margin-left: 4%">状态</span>
+          <div class="layui-input-inline">
+            <select name="contrller" id="articlestate">
+              <option value="4">全部</option>
+              <option value="1">上线</option>
+              <option value="2">下线</option>
+              <option value="0">草稿</option>
+              <option value="3">banner</option>
+            </select>
+          </div>
+          <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">查找</i></button>
+          <button class="layui-btn" onclick="x_admin_show('添加资讯','article-management.html')" style="float: right" ><i class="layui-icon">添加资讯</i></button>
+        </div>
+      </div>
+      <table class="layui-table" lay-filter="consultation-administration" id="consultation-administration" >
+      </table>
+      <xblock>
+        <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>
+        <button class="layui-btn" onclick="setBanner()">设为Banner</button>
+      </xblock>
+
+
+    </div>
+ <script type="text/html" id="textstatus">
+      {{# if(d.uid!=""){
+            var textstates='';
+            if(d.status==0){
+               textstates ='草稿';
+            }else if(d.status==1){
+                textstates ='上线';
+            }else if(d.status==2){
+                textstates ='下线';
+            }else if(d.status==3){
+                textstates ='banner';
+          }
+      return '<span >'+textstates+'</span>'
+    }}
+      {{# } }}      
+    </script>                                                                                                                   
+<script type="text/html" id="barDemo">
+  <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+  <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+  
+  <!-- 这里同样支持 laytpl 语法，如： -->
+  {{#  if(d.auth > 2){ }}
+    <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
+  {{#  } }}
+
+
+</script>
+    <script>
+      var searchurl =URL+'/content/news';
+      layui.use('form', function(){
+        var form = layui.form;
+        
+        //监听提交
+        form.on('submit(sreach)', function(data){
+          if($('#articlestate').val()==4){
+            var findurl =searchurl+"?startTime="+$('#start').val()+"&endTime="+$('#end').val();
+             getaonsultationtable(findurl)
+             return false;
+          }else{
+              var findurl =searchurl+"?startTime="+$('#start').val()+"&endTime="+$('#end').val()+"&status="+$('#articlestate').val();
+              getaonsultationtable(findurl)
+              return false;
+          }  
+        });
+      });
+      layui.use('table', function(){
+        var table = layui.table;
+            table.on('tool(consultation-administration)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        var data = obj.data; //获得当前行数据
+        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        var tr = obj.tr; //获得当前行 tr 的DOM对象
+        console.log(obj)
+        if(layEvent === 'detail'){ //查看
+          //do somehing
+          x_admin_show('内容展示','content-show.html?'+data.id)
+        } else if(layEvent === 'edit'){
+          x_admin_show('编辑查询','article-management-edit.html?'+data.id)
+        }
+        else if(layEvent === 'del'){ //删除
+          layer.confirm('真的删除行么', function(index){
+            $.ajax({
+              type:'DELETE',
+              url:URL+'/content/news/del/'+data.id,
+              success:function(e){
+                if (e.code == 1000) {
+                  layer.msg("删除成功",{icon:1,time:1000});
+                  getaonsultationtable(searchurl)
+                }else{
+                  layer.msg(e.msg)
+                }
+              }
+            })
+          });
+        } else if(layEvent === 'edit'){ //编辑
+          //do something
+          
+          //同步更新缓存对应的值
+          obj.update({
+            username: '123'
+            ,title: 'xxx'
+          });
+        }
+      });
+      checkedDel = []
+      Array.prototype.remove = function(val) { 
+        var index = this.indexOf(val); 
+        if (index > -1) { 
+        this.splice(index, 1); 
+        } 
+      };
+      table.on('checkbox(consultation-administration)', function(obj){
+        console.log(obj.checked); //当前是否选中状态
+        
+        if (obj.checked == true && obj.type == 'one') {
+            checkedDel.push(obj.data.id)
+        }
+        if (obj.checked == false && obj.type == 'one') {
+            checkedDel.remove(obj.data.id)
+        }
+        if (obj.checked == true && obj.type == 'all') {
+          checkedDel = [];
+           tableContent.map(function(item){
+              checkedDel.push(item.id)
+           })
+        }
+        if (obj.checked == false && obj.type == 'all') {
+          checkedDel = []
+        }
+        console.log(checkedDel)
+        console.log(obj.data); //选中行的相关数据
+        console.log(obj.type); //如果触发的是全选，则为：all，如果触发的是单选，则为：one
+      });
+    })
+    </script>
+    <script>
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+
+      /*用户-删除*/
+      function member_del(obj,id){
+          layer.confirm('确认要删除吗？',function(index){
+              //发异步删除数据
+              $(obj).parents("tr").remove();
+              layer.msg('已删除!',{icon:1,time:1000});
+          });
+      }
+
+
+      function getaonsultationtable(urls){
+              layui.use('table', function(){
+              var table = layui.table;
+              
+              //第一个实例
+              table.render({
+                elem: '#consultation-administration'
+                ,height: 312
+                ,url: urls //数据接口
+                
+                ,cellMinWidth: 80
+                ,cols: [[ //表头
+                  {type: 'checkbox', fixed: 'left'}
+                  ,{field:'zizeng', title: '序号',type:'numbers'}
+                  ,{field:'id', title: 'ID'}
+                  ,{field:'title', title: '标题'}
+                  ,{field:'operationName', title: '发布人'}
+                  ,{field:'status', title: '状态',templet:'#textstatus'}
+                  ,{field:'createTime', title: '发布时间'}
+                  ,{field:'readAmount', title: '阅读量'}
+                  ,{field: 'operation', title:'操作',width:160, toolbar: '#barDemo'}
+                ]],
+                response: {
+                      statusName: 'code' //数据状态的字段名称，默认：code
+                      ,statusCode: 1000 //成功的状态码，默认：0
+                      ,msgName: 'msg' //状态信息的字段名称，默认：msg
+                      ,countName: 'count' //数据总数的字段名称，默认：count
+                      ,dataName: 'data.data' //数据列表的字段名称，默认：data
+                      ,success:function(e){
+                        // console.log(e)
+                      }
+                }
+                ,page: true
+ //开启分页
+                ,done:function(res, curr, count){
+                  tableContent = res.data
+                }
+              });
+            });
+      }
+      getaonsultationtable(searchurl)
+      function delAll (argument) {
+        console.log(checkedDel)
+        layer.confirm('确认要删除吗？',function(){
+            //捉到所有被选中的，发异步进行删除
+            $.ajax({
+              type:'POST',
+              url:URL+'/content/news/delAll',
+              data:{ids:checkedDel},
+              success:function(e){
+                if (e.code == 1000) {
+                  layer.msg('删除成功', {icon: 1});
+                   getaonsultationtable(searchurl)
+                }
+              }
+            })
+            
+        });
+      }
+      // function leftlistClick(){
+      //     leftListValue = value;
+      // }
+      function rightlistClick(value){
+          rightListValue = value
+      }
+
+      
+      function setBanner(){
+        left_list = '';
+        right_list = '';
+        $.ajax({
+              type:'GET',
+              async:false,
+              url:URL+'/content/news/banner',
+              success:function(e){
+                if (e.code == 1000) {
+                  banner_list = e.data;
+                  leftlist_flag = banner_list.length
+                }
+              }
+            })
+        $.ajax({
+              type:'GET',
+              async:false,
+              url:URL+'/content/news/onOrDraft',
+              success:function(e){
+                if (e.code == 1000) {
+                  other_list = e.data;
+                  
+                }
+              }
+            })
+        
+        banner_list.map(function(item){
+            left_list = left_list + '<li class="leftlist" id='+item.id +'>'+item.title+'</li>'
+        })
+        other_list.map(function(item){
+            right_list = right_list + '<li class="rightlist"  id='+item.id +'>'+item.title+'</li>'
+        })
+        console.log(left_list)
+        var html = '<div><h4>请在右侧选择需要替换成banner的文章（上限三篇）</h4><div class="banner_list"><div class="banner_left">'+left_list+'</div><div class="banner_right">'+right_list+'</div></div></div>'
+
+        layer.confirm(html, {btn: ['确认', '取消'], title: "提示"}, function () {
+          if (leftlist_flag == 3) {//如果右边不为空
+            if (leftListValue == null || leftListValue == undefined ||leftListValue == '') {
+              layer.msg("左边未选择")
+              return false
+            }
+            if (rightListValue == null || rightListValue == undefined ||rightListValue == '') {
+              layer.msg("右边未选择")
+              return false
+            }
+          }else if (leftlist_flag < 3){
+            if (rightListValue == null || rightListValue == undefined ||rightListValue == '') {
+              layer.msg("右边未选择")
+              return false
+            }
+            leftListValue = '';
+          }
+          $.ajax({
+             type:'PUT',
+              async:false,
+              url:URL+'/content/news/setBanner',
+              data:{
+                bannerId:leftListValue,
+                newsId:rightListValue
+              },
+              success:function(e){
+                if (e.code == 1000) {
+                  layer.msg('替换成功');
+                  getaonsultationtable(searchurl)
+                }else{
+                  layer.msg(e.msg);
+                }
+              }
+          })
+        })
+        $('.leftlist').bind('click', function(){
+          
+         leftListValue = $(this).attr('id');
+         console.log(leftListValue)
+          $('.leftlist').removeClass('red');
+          $(this).addClass('red')
+        });
+         $('.rightlist').bind('click', function(value){
+          rightListValue = $(this).attr('id');
+          console.log(rightListValue)
+          $('.rightlist').removeClass('red')
+          $(this).addClass('red')
+        });
+    
+      }
+
+
+
+      
+    </script>
+  </body>
+
+</html>

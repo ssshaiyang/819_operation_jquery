@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/doector-details.css">
+</head>
+<style>
+.register_doctor_select {
+    vertical-align: bottom;
+}
+
+.register_doctor_table {
+    margin: 0 auto;
+}
+
+.register_doctor {
+    text-align: center;
+}
+
+.pie_chart {
+    display: flex;
+    justify-content: space-around;
+}
+</style>
+
+<body style="height: 100%; margin: 0">
+    <div class="date_show_list">
+        <div class="register_doctor">
+            <h2>用户注册总人数</h2>
+            <div class="register_doctor_botton layui-input-inline">
+                <select name="year_select" class="register_doctor_year register_doctor_select" id="zcySelect">
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                </select>
+
+
+            </div>
+            <div id="register_doctor_table" style="width: 800px;height:400px; margin:0 auto;"></div>
+        </div>
+        <div class="pie_chart">
+            <div id="pie_chart_1" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+            <div id="pie_chart_2" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+            <div id="pie_chart_3" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript">
+function getPatientData(year){
+    $.ajax({
+    type:'GET',
+    async:false, 
+    data:{
+        year:year,
+        hospitalClass:1
+    },
+    url:URL+'/home/getPatientCount',
+    success:function(e){
+        if (e.code == 1000) {
+            month = [];
+            patientNum = [];
+            patientlist = e.data
+            e.data.map(function(item){
+                month.push(item.month);
+                patientNum.push(item.patientNum);
+            })
+            console.log(month)
+            console.log(patientNum)
+        }else{
+            layui.use('layer', function(){
+              var layer = layui.layer;
+              
+              layer.msg(e.msg,{icon:2,time:2000})
+              return false;
+            }); 
+            
+        }
+    }
+   })
+    var dom = document.getElementById("register_doctor_table");
+    var myChart = echarts.init(dom);
+    var app = {};
+    option = null;
+    option = {
+        xAxis: {
+            type: 'category',
+            data: month
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: patientNum,
+            type: 'line'
+        }]
+    };
+    if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+    }
+}
+
+getPatientData(2018);
+
+
+</script>
+<script>
+$(document).ready(function(){
+    $('#zcySelect').change(function(){
+        console.log($(this).children('option:selected').val());
+        var year=$(this).children('option:selected').val();
+        getPatientData(year);
+    })
+})
+</script>

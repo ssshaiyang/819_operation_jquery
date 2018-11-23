@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="css/doector-details.css"> -->
+</head>
+<style>
+.register_doctor_select {
+    vertical-align: bottom;
+}
+
+.register_doctor_table {
+    margin: 0 auto;
+}
+
+.register_doctor {
+    text-align: center;
+}
+
+.pie_chart {
+    display: flex;
+    justify-content: space-around;
+}
+.pie_chart_title{
+    text-align: center;
+    font-size: 24px;
+    padding: 20px;
+}
+</style>
+
+<body style="height: 100%; margin: 0">
+    <div class="date_show_list">
+        <div class="register_doctor">
+            
+            <div id="register_doctor_table" style="width: 800px;height:400px; margin:0 auto;"></div>
+        </div>
+        <div class="pie_chart_title"></div>
+        <div class="pie_chart">
+            
+            <div id="pie_chart_1" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+            <div id="pie_chart_2" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+            
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript">
+   $.ajax({
+    type:'GET',
+    async:false, 
+    url:URL+'/content/departmentData',
+    success:function(e){
+        if (e.code == 1000) {
+            departmentName = [];
+            inquisitionNum = [];
+            department = e.data
+            e.data.map(function(item){
+                departmentName.push(item.departmentName);
+                inquisitionNum.push(item.inquisitionNum);
+            })
+            console.log(departmentName)
+            console.log(inquisitionNum)
+        }else{
+            layui.use('layer', function(){
+              var layer = layui.layer;
+              
+              layer.msg(e.msg,{icon:2,time:2000})
+              return false;
+            }); 
+            
+        }
+    }
+   })
+var dom = document.getElementById("register_doctor_table");
+var myChart = echarts.init(dom);
+var app = {};
+option = null;
+option = {
+    title: {
+        text: '各个科室问诊量(点击柱形查看详细)',
+        x: 'center'
+    },
+    xAxis: {
+        type: 'category',
+        data: departmentName,
+        axisLabel:{
+            interval:0
+        }
+    },
+    yAxis: {
+        type: 'value'
+    },
+    series: [{
+        name: '科室数据',
+        type: 'bar',
+        data: inquisitionNum,
+       
+    }]
+};
+if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+myChart.on('click', function (params) {
+    // 控制台打印数据的名称
+    for(let i=0;i<department.length;i++){
+        if(department[i].departmentName == params.name){
+            departmentId = department[i].id;
+            departmentTitle = params.name;
+        }
+    }
+    console.log(departmentTitle)
+    $.ajax({
+        type:'GET',
+        async:false, 
+        url:URL+'/content/departmentDataDetail/'+departmentId, 
+        success:function(e){
+            if (e.code == 1000) {
+                $(".pie_chart_title").text("当前科室信息："+departmentTitle)
+                inquisitionRank = [];
+                doctorNum = [] ;
+                month = [] ;
+                e.data.map(function(item){
+                    inquisitionRank.push(item.inquisitionNum);
+                    doctorNum.push(item.doctorNum);
+                    month.push(item.month);
+                })
+                console.log(inquisitionRank);
+                var chart_dom_1 = document.getElementById("pie_chart_1");
+                var myChart_1 = echarts.init(chart_dom_1);
+                var app = {};
+                chart_option_1 = null;
+                chart_option_1 = {
+                    title: {
+                        text: '问诊量排名',
+                        x: 'center'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: month
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: inquisitionRank,
+                        type: 'line'
+                    }]
+                };
+                if (chart_option_1 && typeof chart_option_1 === "object") {
+                    myChart_1.setOption(chart_option_1, true);
+                };
+
+                var chart_dom_2 = document.getElementById("pie_chart_2");
+                var myChart_2 = echarts.init(chart_dom_2);
+                var app = {};
+                chart_option_2 = null;
+                chart_option_2 = {
+                    title: {
+                        text: '注册医生数量',
+                        x: 'center'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: month
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: doctorNum,
+                        type: 'line'
+                    }]
+                };
+                if (chart_option_2 && typeof chart_option_2 === "object") {
+                    myChart_2.setOption(chart_option_2, true);
+                } 
+            }
+        }
+    })
+    console.log(params);
+});
+</script>
+
+</html>

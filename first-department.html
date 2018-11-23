@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>一级科室</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <style type="text/css">
+    #uploadpic{
+      width: 200px;
+    }
+    .a-upload {
+      padding: 4px 10px;
+      height: 20px;
+      line-height: 20px;
+      position: relative;
+      cursor: pointer;
+      color: #888;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      display: inline-block;
+      *display: inline;
+      *zoom: 1
+    }
+      .a-upload  input {
+        cursor: pointer;
+        position: absolute;
+        font-size: 100px;
+        right: 0;
+        top: 0;
+        opacity: 0;
+        filter: alpha(opacity=0);
+        cursor: pointer
+      }
+      .a-upload:hover {
+        color: #444;
+        background: #eee;
+        border-color: #ccc;
+        text-decoration: none
+      }
+      #departmentName{
+         width: 200px;
+         height: 30px;
+      }
+      #addshowpic{
+        width: 200px;
+        height: 60px;
+      }
+  </style>
+  <body>
+    <div class="x-body">
+      <div class="layui-row" style="overflow: hidden;">
+      		<div style="float: left;">一级科室列表</div>
+       		<button class="layui-btn" style="float: right;" onclick="x_admin_show('二级科室','two-department.html')">二级科室管理</button>
+      </div>
+      <table class="layui-table" id="first_department">
+      </table>
+      <div class="layui-btn" onclick="addSection()">新增科室</div>
+    </div>
+    <script type="text/html" id="barDemo">
+      {{# if(d.id!=""){
+      var rid = localStorage.getItem('rid');
+      if (rid == '1') {
+        if(d.peopleNum>0){
+           return '<button class="layui-btn layui-btn-xs" lay-event="edit" onclick="get_revision('+d.id+')">修改</button><button class="layui-btn layui-btn-disabled layui-btn-xs" >删除</button>'
+        }else{
+          return '<button class="layui-btn layui-btn-xs" lay-event="edit" onclick="get_revision('+d.id+')">修改</button><button class="layui-btn layui-btn-danger layui-btn-xs" onclick="del_content('+d.id+')" lay-event="del">删除</button>'
+        }     
+     }
+      else{
+        return '<button class="layui-btn layui-btn-xs" lay-event="edit" onclick="get_revision('+d.id+')">修改</button><button class="layui-btn layui-btn-disabled layui-btn-xs" >删除</button>'
+    }
+
+    }}
+      {{# } }}
+
+    </script>
+    <script>
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+
+      var picupload =0;
+      // 页面渲染
+      function getfirst_department(){
+          layui.use('table', function(){
+            var table = layui.table;
+            
+            //第一个实例
+            table.render({
+              elem: '#first_department'
+              ,height: 312
+              ,url: URL+'/content/firstDepartment' //数据接口
+              ,page: true //开启分页
+              ,cellMinWidth: 80
+              ,cols: [[ //表头
+                {field: 'departmentName', title: '名称', fixed: 'left'}
+                ,{field: 'peopleNum', title: '拥有人数'}
+                ,{field: 'subordinateDepartment', title: '下属科室'}
+                ,{field: 'id', title:'操作', toolbar: '#barDemo'}
+              ]],response: {
+                  statusName: 'code' //数据状态的字段名称，默认：code
+                  ,statusCode: 1000 //成功的状态码，默认：0
+                  ,msgName: 'msg' //状态信息的字段名称，默认：msg
+                  ,countName: 'data.totalCount' //数据总数的字段名称，默认：count
+                  ,dataName: 'data.data' //数据列表的字段名称，默认：data
+                }
+            });
+            
+          });
+      }
+      getfirst_department();
+       var pic=0;
+       function uploadbtn(){
+          $('#uploadpic').click();
+           // var fileObj = document.getElementById("FileUpload").files[0];
+      }
+      function revision_section(Name,id,Image){
+        console.log(Name)
+        console.log(id)
+        var uploadImg = Image;
+        var str = "<div><div><div>科室名</div><input type='text' id='departmentName' value='"+Name+"'/></div><div><div>科室图片</div><a class='a-upload'><input id='uploadpic'  type='file' name='uploadpic' onchange='changepic(1)'>点击此处上传科室图片</a></div><img src='"+Image+"' id='addshowpic'></div>";
+          layer.confirm(str, {btn: ['确认', '取消'], title: "提示"}, function () {
+          var departmentName = $("#departmentName").val();
+          console.log(pic)
+            if (departmentName == null || departmentName == undefined ||departmentName=="") {
+                alert('请输正确科室');
+            }else{
+              var formData = new FormData();
+              if(picupload!=0){ 
+                formData.append('departmentImage', $("#uploadpic")[0].files[0]); 
+                picupload=0;
+              }
+              formData.append('departmentName',departmentName) 
+                $.ajax({
+                  type:'POST',
+                  contentType: false,  
+                  processData:false,
+                  url:URL+'/content/firstDepartment/modify/'+id,
+                  data:formData,
+                  success:function(e){
+                      if(e.code==1000){
+                        layer.msg("修改成功");
+                        getfirst_department()
+                      }else{
+                        layer.msg(e.msg)
+                      }
+                  }
+                });
+              }
+           });
+      }
+        function get_revision(id){
+        $.ajax({
+              type:'GET',
+              url:URL+'/content/firstDepartment/detail/'+id,
+              data:{
+              },
+              success:function(e){
+                console.log(e)
+                 if(e.code=1000){ 
+                  console.log(e)
+                  revision_section(e.data.departmentName,id,e.data.departmentImage)
+                 }else{
+                  alert(e.msg)
+                 }
+              }
+        });
+      }
+      function changepic(){
+        picupload =1;
+        var file=$("#uploadpic")[0].files[0];
+        var reader = new FileReader();
+        var imgFile;
+        reader.onload=function(e) {
+          imgFile = e.target.result;
+          $("#addshowpic").attr('src', imgFile);    
+        };
+        reader.readAsDataURL(file);
+      }
+      var index = 1
+      function addSection(){
+        var strs = "<div><h4>请输入一级科室名称</h4><input type='text' id='departmentName' /><div>科室图片</div><div><a class='a-upload'><input id='uploadpic'  type='file' name='uploadpic' onchange='changepic()'>点击此处上传科室图片</a></div><img src='' id='addshowpic'></div>";
+            
+          layer.confirm(strs, {btn: ['确认', '取消'], title: "提示"}, function () {
+          var formData = new FormData($('#uploadForm')[0]);
+            var departmentName = $("#departmentName").val();
+            if (departmentName == null || departmentName == undefined ||departmentName==""||picupload==0) {
+                alert('还有信息未填写');
+            }else{
+              picupload=0;
+              var formData = new FormData();
+               formData.append('departmentImage', $("#uploadpic")[0].files[0]); 
+               formData.append('departmentName',departmentName)  
+                $.ajax({
+                    type:'POST',
+                    contentType: false,  
+                    processData:false,
+                    url:URL+'/content/firstDepartment/create',
+                    data:formData,
+                    success:function(e){
+                        if (e.code == 1000) {
+                          layui.use('layer', function(){
+                          var layer = layui.layer;
+                          layer.msg("添加成功");
+                          layer.close(index);
+                          getfirst_department()
+                          index = index + 1;
+                        }); 
+                      }else{
+                        layer.msg(e.msg);
+                      }
+                    }
+                });
+            } 
+            
+        })
+      }
+      function del_content(id){
+        layer.confirm('是否确认删除该科室', {btn: ['确认', '取消'], title: "提示"}, function () {
+          $.ajax({
+              type:'DELETE',
+              url:URL+'/content/firstDepartment/del/'+id,
+              data:{},
+              success:function(e){
+                  if (e.code == 1000) {
+                    layer.msg("删除成功");
+                    getfirst_department()
+                  }else{
+                    layer.msg(e.msg);
+                   }
+              }
+          });
+        })
+      }
+    </script>
+  </body>
+
+</html>

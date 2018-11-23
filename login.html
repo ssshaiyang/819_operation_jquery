@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>819登录页</title>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+	<link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+	<script type="text/javascript" src="./js/webconfig.js"></script>
+
+</head>
+<style type="text/css">
+	.login-pic{
+		float: left;
+		margin-right: 5%;
+		min-width: 400px;
+		min-height: 420px;
+		background: url(images/pexels-photo-1289902_u83.png);
+		background-size: 100% 100%;
+		display: inline-block;
+	}
+	.login{
+		float: left;
+		min-width: 420px;
+		display: inline-block;
+		margin:0;
+		background-color: #C0C0C0;
+	}
+	.login .message{
+		    margin: 10px 0px 0px 0px
+	}
+	.login input {
+		margin-bottom: 10px;
+	}
+	
+	.login-box{
+		overflow: hidden;
+		width: 80%;
+		min-width: 1100px;
+		margin: 200px auto;
+	}
+</style>
+<body>
+	<div class="login-box">
+		<div class="login-pic"></div>
+	    <div class="login layui-anim layui-anim-up">       
+	        <form method="post" class="layui-form" >
+	            <input id="username" name="username" placeholder="用户名"  type="text" lay-verify="required" class="layui-input" >
+	            <input id="password" name="password" lay-verify="required" placeholder="密码"  type="password" class="layui-input">
+	            <div style="overflow: hidden;">
+		            <input id="code" name="code" style="width: 60%;display: inline-block;float: left;" lay-verify="required" placeholder="验证码"  type="text" class="layui-input">
+		            <img id="getcode" style="width: 38%;height: 50px;float: left;margin-left: 4px;" onclick="updatecode()" src="" alt="获取验证码">
+		        </div>
+	            <input value="登录" lay-submit lay-filter="login" style="width:100%;" type="submit">
+	            <input  style="margin-top: 10px;" value="重置" style="width:100%;" onclick="resetlogin()" type="button">
+	        </form>
+	    </div>
+	</div>
+
+    <script>
+        $(function  () {
+		$('#getcode').attr('src',URL+'/captcha')
+            layui.use('form', function(){
+              var form = layui.form;
+              // layer.msg('玩命卖萌中', function(){
+              //   //关闭后的操作
+              //   });
+              //监听提交
+              form.on('submit(login)', function(data){
+              	var datas=data.field;
+                $.ajax({
+	                url:URL+"/users/login",
+	                dataType:'json',
+	                async:true,
+	                data:{
+	                	username:datas.username,
+	                	password:datas.password,
+	                	code:datas.code
+	                },
+	                type:'POST',
+	                success:function(data){
+	                	console.log(data)
+	                	if(data.code!=1000){
+	                		layer.msg(data.msg);
+	                	}else{
+		                	localStorage.setItem('token',data.data.token);
+		                	localStorage.setItem('rid',data.data.rid);
+		                	localStorage.setItem('username',datas.username);
+		                	location.href='index.html';
+	                	}	                   
+	                }
+                })
+                return false;
+              });
+            });
+        })
+        function updatecode(){
+        	$('#getcode').attr('src',URL+'/captcha')
+        }
+        function resetlogin(){
+        	$('#username').val("");
+        	$('#password').val("");
+        	$('#code').val("");
+        }
+    </script>
+</body>
+</html>

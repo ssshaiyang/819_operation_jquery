@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>患者用户管理-异常原因</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <style type="text/css">
+    .doctor-headerpic{
+        float: left;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        line-height: 140px;
+        text-align: center;
+        background-color: yellow;
+      }
+
+      .doctor-information{
+        font-size: 24px;
+        float: left;
+        margin-left: 15px;
+      }
+
+      .positon-text{
+        margin-left: 40px;
+      }
+
+      .doctor-information div{
+        margin-bottom: 15px;
+      }
+
+      .doctor-worktime{
+        font-size: 24px;
+        float: right;
+      }
+      .doctor-details-footer{
+        overflow: hidden;
+        width: 90%;
+        margin:0 auto;
+      }
+      .doctor-details-footer li{
+        float: left;
+        background-color: #C0C0C0;
+        cursor: pointer;
+        margin-right: 6%;
+        width: 180px;
+        line-height: 60px;
+        text-align: center;
+        height: 60px;
+      }
+      .inquisition-Content{
+        width: 100%;
+        margin-top: 40px;
+        display: inline-block;
+        padding: 4%;
+        background-color: #C0C0C0;
+      }
+      .inquisition-Content img{
+        width: 10%;
+        margin-left: 20px;
+        height: 40px;
+      }
+      .content-left{
+        float: left;
+        overflow: hidden;
+        width: 70%;
+        display: inline-block;
+      }
+
+      .content-right{
+        margin-top: 4%;
+          overflow: hidden;
+          float: right;
+        width: 20%;
+        margin-left: 5%;
+        display: inline-block;
+      }
+      .layui-btn+.layui-btn{
+          margin-left: 0px;
+      }
+      .content-right button{
+        float: left;
+        margin-bottom: 20px;
+        width: 100%;
+        text-align: center;
+      }
+       .allbox{
+      overflow: hidden;
+    }
+
+    .patientbox{
+      width: 60%;
+      float: left;
+    }
+    .docbox{
+      width: 40%;
+      float: left;
+    }
+     #imgshows{
+      position: absolute;
+      width: 200px;
+      background: red;
+      height: 200px;
+      left: 30%;
+      top: 200px;
+      display: none;
+      cursor: pointer;
+    }
+  </style>
+  <body>
+    <div class="x-body" style="padding-top: 60px;border-top: 1px solid #C0C0C0;overflow: hidden;">
+      <div class="content-left" id="content-left">
+      </div>
+      <div class="content-right"">
+        <div>异常原因:<span id="abnormal-cause"></span></div>
+        <button class="layui-btn" style="margin-top: 10px;" onclick="abnormity()">消除异常</button>
+        <button class="layui-btn" onclick="member_del()">加入黑名单</button>
+        <button class="layui-btn" onclick="x_admin_close()">返回</button>
+      </div>
+    </div>
+    <img onclick="hideimgs()" src="" id="imgshows">
+    <script>
+      var abnormal_id=-1;
+      var black_id =0;
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+      var abnormalcheck =0;
+      var search = document.location.search;
+      var arr =search.split("|");
+      var strs = arr[0].split("=")[1];/*问诊id*/
+      var patientid =arr[1].split("=")[1];/*患者id*/
+      function showimg(e){
+        $('#imgshows').css('display','block')
+         $('#imgshows').attr('src',e)
+      }
+      function hideimgs(){
+        $('#imgshows').css('display','none')
+         $('#imgshows').attr('src',"")
+      }
+      $.ajax({
+          type:'GET',
+          url:URL+'/member/patient/getInquisitionDetail/'+strs,
+          data:{
+          },
+          success:function(e){
+            console.log(e)
+              if(e.code==1000){
+               $('#abnormal-cause').html(e.data.abnormal_reason);
+               if(e.data.abnormal_reason=='正常'){
+                  abnormalcheck=1;
+               }
+               abnormal_id=e.data.abnormal_id;
+               black_id = e.data.uid;
+               for(var i=0;i<e.data.msgList.length;i++){
+                var picArr="";
+                var msglength =e.data.msgList[i].imgPic.length;
+                  for(var j =1;j<msglength;j++){
+                      var picimg = "'"+e.data.msgList[i].imgPic[i]+"'";
+                      picArr+= '<img style="cursor:pointer" onclick="showimg('+picimg+')" src="'+e.data.msgList[i].imgPic[i]+'"/>';
+                  }
+                  var answerTime ="暂未回复"
+                  if(e.data.msgList[i].doctorAnswer.answerTime!=undefined){
+                      answerTime=e.data.msgList[i].doctorAnswer.answerTime;
+                  }
+                  // 回答内容
+                  var answerContent=""
+                  if(e.data.msgList[i].doctorAnswer.answerContent!=undefined){
+                    answerContent=e.data.msgList[i].doctorAnswer.answerContent
+                  }
+                  $('#content-left').append('<div class="inquisition-Content"><div class="allbox"><div class="patientbox">第'+(i+1)+'次提问('+e.data.msgList[i].askTime+')<div>'+e.data.msgList[i].content+'</div></div><div class="doctorbox">医生回复（'+answerTime+'）<div>'+answerContent+'</div></div></div><div style="margin-top: 20px;">'+picArr+'</div></div>')
+               }
+              }else{
+                layer.msg(e.msg)
+              }
+          }
+      });
+      function abnormity(){
+        if(abnormalcheck==1){
+          layer.msg('该用户没有异常无需消除')
+        }else{
+            layer.confirm('是否确认消除异常', {btn: ['确认', '取消'], title: "提示"}, function () {
+              $.ajax({
+                type:'POST',
+                url:URL+'/member/patient/removeAbnormal',
+                data:{
+                  abnormal_id:abnormal_id
+                },
+                success:function(e){
+                    if(e.code==1000){
+                      layer.msg('已经消除异常')
+                      x_admin_close();
+                    console.log(e)
+                    }else{
+                      layer.msg(e.msg)
+                    }
+                }
+            });
+          })
+        }
+      }
+      function member_del(){
+          var str = "<div><h4>是否将改用户加入黑名单</h4><p>原因：<input type='text' id='price' /></p></div>";
+          layer.confirm(str, {btn: ['确认', '取消'], title: "提示"}, function () {
+          var price = $("#price").val();
+          console.log(price)
+            if (price == null || price == undefined ||price=="") {
+                alert('请输原因');
+            }else{            
+               $.ajax({
+                    type:'POST',
+                    url:URL+'/member/patient/addBlacklist',
+                    data:{
+                        user_id:patientid,
+                        reason:price
+                    },
+                    success:function(e){
+                        if(e.code==1000){
+                          x_admin_close();
+                        }else{
+                          layer.msg(e.msg)
+                        }
+                    }
+                });
+            }
+         });
+      }
+    </script>
+  </body>
+
+</html>

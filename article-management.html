@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>文章管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javescript" src="https://unpkg.com/wangeditor@3.1.1/release/wangEditor.min.js"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <style type="text/css">
+  	.banner-show{
+  		float: left;
+  		margin-left: 4%;
+  		display: inline-block;
+  		width: 400px;
+  		height: 100px;
+  	}
+    .banner-show-img{
+      
+      width: 400px!important;
+      height: 100px!important;
+    }
+  	.article-header{
+  		width: 60%;
+  		min-width: 524px;
+  		text-align: center;
+  		margin: 20px auto;
+  		overflow: hidden;
+  	}
+
+  	.article-header img{
+/*  		text-align: center;*/
+  		width: 100px;
+  		height: 100px;
+  		float: left;
+  	}
+
+  	.centre-content{
+  		width: 80%;
+  		min-width: 1224px;
+  		margin: 20px auto;
+  		overflow: hidden;
+  	}
+  	.input-header{
+  		font-size: 20px;
+  		float: left;
+		width: 40%;
+		height: 68px;
+  	}
+  	.check-time{
+  		float: left;
+  		padding: 10px;
+  		display: inline-block;
+  		line-height: 46px;
+  		border:1px solid #C0C0C0;
+  	}
+  	.check-time input{
+  		margin-left: 4px;
+  	}
+  	.Platform-type{
+  		border:1px solid #C0C0C0;
+  		padding: 0 10px 10px 10px;
+  		float: left;
+  		height: 56px;
+  	}
+  </style>
+  <body>
+    <div class="x-body">
+      <div class="article-header">
+      	<img  id="test1" src="./images/add.jpg">
+		    <div  class="banner-show">
+          <img class="layui-upload-img banner-show-img" id="banner-show-img">
+        </div>
+      </div>
+      <div class="centre-content">
+      	<input type="text" id="content-title" name="title" required lay-verify="required" maxlength="15" placeholder="请输入标题" autocomplete="off" class="layui-input input-header">
+      	
+      </div>
+      <div class="centre-content"> 
+        <div class="check-time layui-form">
+          <input type="radio" class="" name="postmode" value="1" title="及时发送">
+          <input type="radio" class="layui-radio" name="postmode" value="2" title="定时发送"> 
+          <input type="radio"  class="layui-radio" name="postmode" value="0" title="保存为草稿"><input type="text" id="content-time" class="layui-input" style="width: 210px" placeholder="需要定时发送的时间" name="start">
+          
+        </div>  
+      	<div class="Platform-type layui-form">
+      		<div>请选择发布平台：</div>
+      		<input type="radio" class="" name="postplatform" value="1" title="患者端">
+          <input type="radio" class="layui-radio" name="postplatform" value="2" title="医生端"> 
+      	</div>
+      </div>
+	  <div id="editor">
+    </div>
+    <script type="text/javascript" src="./js/wangEditor.min.js"></script>
+
+    <div class="layui-btn" onclick="contentPost()" id="contentPost">发送</div>
+    <div class="layui-btn layui-btn-primary" onclick="cleanContent()">清空</div>
+    </div>
+    <script type="text/javascript">
+        var E = window.wangEditor
+        var editor = new E('#editor')
+        // 或者 var editor = new E( document.getElementById('editor') )
+        editor.customConfig.debug = location.href.indexOf('wangeditor_debug_mode=1') > 0;
+        editor.customConfig.uploadImgServer = URL+'/upload';
+        var token = localStorage.getItem("token");
+        editor.customConfig.uploadFileName = 'file'
+        editor.customConfig.uploadImgHeaders = {
+            'Accept': 'application/json',
+            'Authorization': '' + token
+        }
+        editor.customConfig.uploadImgHooks = {
+            customInsert: function (insertImg, result, editor) {
+                // 图片上传并返回结果，自定义插入图片的事件（而不是编辑器自动插入图片！！！）
+                // insertImg 是插入图片的函数，editor 是编辑器对象，result 是服务器端返回的结果
+
+                // 举例：假如上传图片成功后，服务器端返回的是 {url:'....'} 这种格式，即可这样插入图片：
+                var url = result.data.url
+                console.log(result)
+                insertImg(url)
+
+                // result 必须是一个 JSON 格式字符串！！！否则报错
+            }
+        }
+        editor.create();
+        //清空
+        function cleanContent(){
+          editor.txt.clear()
+        }
+        //发送
+        layui.use('layer', function(){
+           layer = layui.layer;
+        });   
+        index = 1 
+        function contentPost(){
+                  // 读取 html
+            console.log(editor.txt.html())
+            console.log($("#content-time").val())
+            var content = editor.txt.html();
+            if ($("#banner-show-img")[0].src) {
+              var imgUrl = $("#banner-show-img")[0].src
+            }else{
+              layer.msg("没有上传Banner图",{icon:2,time:2000});
+              return false
+            }
+            console.log($("#content-title").val())
+            if ($("#content-title").val()==null||$("#content-title").val()== undefined ||$("#content-title").val()== '') {
+              layer.msg("没有填写标题",{icon:2,time:2000});
+              return false
+            }else{
+              var title = $("#content-title").val();
+              console.log(title)
+            }
+            if ($('input[name="postplatform"]:checked').val()== undefined) {
+              layer.msg("没有选择发布平台",{icon:2,time:2000});
+              return false
+            }else{
+              var platform = $('input[name="postplatform"]:checked').val();
+            }
+            if ($('input[name="postmode"]:checked').val()== undefined) {
+              layer.msg("没有选择发布方式",{icon:2,time:2000});
+              return false
+            }else{
+              var postmode = $('input[name="postmode"]:checked').val();
+             
+              if (postmode == '2' && ($("#content-time").val()=='') ) {
+                layer.msg("没有选择定时发布时间",{icon:2,time:2000});
+              }else{
+                var posttime = $("#content-time").val()
+              }
+            }
+
+            $.ajax({
+              type:'post',
+              url:URL+'/content/news/create',
+              data:{
+                imgUrl:imgUrl,
+                title:title,
+                platform:platform,
+                status:postmode,
+                content:content
+              },
+              success:function(e){
+                if (e.code == 1000) {
+                  layer.msg("添加成功",{icon:1,time:2000});
+                  x_admin_close();
+                }
+              } 
+            }) 
+        }
+    </script>
+    <script>
+      layui.use('upload', function(){
+        var upload = layui.upload;
+       
+        //执行实例
+        var uploadInst = upload.render({
+          elem: '#test1' //绑定元素
+          ,url: URL+'/upload' //上传接口
+          ,done: function(res){
+            //上传完毕回调
+            $('#banner-show-img').attr('src',res.data.url)
+            console.log(res)
+          }
+          ,error: function(){
+            //请求异常回调
+            console.log(123)
+          }
+        });
+
+      })
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({  
+          type:'datetime',
+          elem: '#content-time' //指定元素
+        });
+      });
+    </script>
+  </body>
+
+</html>

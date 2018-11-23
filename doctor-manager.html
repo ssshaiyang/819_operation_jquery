@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>医生用户管理-详细页</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  
+  <body>
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+          <input type="text" id="doctorname" name="username" style="width: 400px;"  placeholder="请输入你要查找的医生名或手机号" autocomplete="off" class="layui-input">
+          <button class="layui-btn"  lay-submit="" lay-filter="findDoctor"><i class="layui-icon">查找</i></button>
+        </form>
+      </div>
+      <table id="doctor_manager" lay-filter="doctor_manager"></table>
+
+    </div>
+    <div>
+      <button style="margin-left: 20px;" onclick="x_admin_show('黑名单管理','black-list.html')" class="layui-btn">黑名单管理</button>
+      <button class="layui-btn" onclick="x_admin_show('异常管理','abnormal-adminstration.html')">异常管理</button>
+    </div>
+    <script type="text/html" id="managertext">
+      {{# if(d.uid!=""){
+      if(d.status==2||d.status==4){
+          return '<span style="cursor: pointer;">'+d.docName+'</span>'
+      }else{
+          var showuser ="'"+'异常原因'+"','"+"doctor-details.html?docId="+d.docId+"|inquisitionId="+d.inquisitionId+"'";
+          return '<span style="cursor: pointer;" onclick="x_admin_show('+showuser+')">'+d.docName+'</span>'
+      }
+    }}
+      {{# } }}      
+    </script>
+    <script type="text/html" id="abnormaltext">
+      {{# if(d.uid!=""){
+        var doctorstates =d.abnormal;
+        if(d.abnormal=='正常'){
+            if(d.status==1){
+                doctorstates ='正常';
+            }else if(d.status==3){
+                doctorstates ='冻结';
+            }else if(d.status==4){
+                doctorstates ='黑名单';
+          }
+        }
+      return '<span >'+doctorstates+'</span>'
+    }}
+      {{# } }}      
+    </script>
+     <script type="text/html" id="doatortime">
+      {{# if(d.uid!=""){
+       var doctortimes = Number(d.receptionTime);
+       doctortimes=doctortimes.toFixed(3);
+      return '<span >'+doctortimes+'</span>'
+    }}
+      {{# } }}      
+    </script>
+    <script>
+      var doctorurl =URL+'/member/doctor/getList'
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+
+      layui.use('form', function(){
+        var form = layui.form;
+        
+        //监听提交
+        form.on('submit(findDoctor)', function(data){
+          console.log($('#attribute').val() )
+          var findurl =doctorurl+"?filter="+$('#doctorname').val();
+          console.log(findurl)
+          getdoctortable(findurl)    
+          return false;
+        });
+      });
+      function getdoctortable(urls){
+          layui.use('table', function(){
+            var table = layui.table;
+            
+            //第一个实例
+            table.render({
+              elem: '#doctor_manager'
+              ,height: 312
+              ,url: urls //数据接口
+              ,page: true //开启分页
+              ,cellMinWidth: 80
+              ,cols: [[ //表头
+                {field: 'docName', title: '用户名',fixed: 'left',templet:'#managertext'}
+                ,{field: 'phone', title: '手机号'}
+                ,{field: 'receptionTime', title: '本月接诊时间(小时)',templet:'#doatortime'}
+                ,{field: 'averageScore', title: '本月平均分(分)'} 
+                ,{field: 'abnormal', title: '用户状态',templet:'#abnormaltext'}
+              ]],response: {
+                    statusName: 'code' //数据状态的字段名称，默认：code
+                    ,statusCode: 1000 //成功的状态码，默认：0
+                    ,msgName: 'msg' //状态信息的字段名称，默认：msg
+                    ,countName: 'count' //数据总数的字段名称，默认：count
+                    ,dataName: 'data.data' //数据列表的字段名称，默认：data
+              }
+            });
+            
+          });
+      }
+      getdoctortable(doctorurl)
+    </script>
+  </body>
+
+</html>

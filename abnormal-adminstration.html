@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>医生用户管理-异常管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  
+  <body>
+    <div class="x-body">
+      <table class="layui-table" id="abnormal-adminstartion">
+      </table>
+
+    </div>
+    <script src="http://mockjs.com/dist/mock.js"></script>
+    <script type="text/html" id="barDemo">
+       {{# if(d.id!=""){
+        if(d.status==0){
+          return '<button class="layui-btn layui-btn-xs" onclick="relieveabnormal('+d.id+',2)" lay-event="edit">恢复</button>'
+        }else{
+          return '<button class="layui-btn layui-btn-xs" onclick="relieveabnormal('+d.id+',1)" lay-event="edit">解除</button>'
+        }
+    }}
+      {{# } }}
+      
+    </script>
+    <script>
+      layui.use('table', function(){
+        var table = layui.table;
+        
+        //第一个实例
+        table.render({
+          elem: '#abnormal-adminstartion'
+          ,height: 312
+          ,url: URL+'/member/doctor/getAbnormalTypeList' //数据接口
+          ,page: true //开启分页
+          ,cellMinWidth: 80
+          ,cols: [[ //表头
+            {field: 'name', title: '异常名称', fixed: 'left'}
+            ,{field: 'decisionMethod', title: '判断方式'}
+            ,{field: 'status',fixed: 'right', title:'操作', toolbar: '#barDemo'}
+          ]],response: {
+            statusName: 'code' //数据状态的字段名称，默认：code
+            ,statusCode: 1000 //成功的状态码，默认：0
+            ,msgName: 'msg' //状态信息的字段名称，默认：msg
+            ,countName: 'count' //数据总数的字段名称，默认：count
+            ,dataName: 'data.data' //数据列表的字段名称，默认：data
+          }
+        });
+        
+      });
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+      function relieveabnormal(id,checkid){
+        $.ajax({
+            type:'POST',
+            url:URL+'/member/doctor/exceptionHandling',
+            data:{
+              abnormal_type_id:id,
+              abnormalOperation:checkid
+            },
+            success:function(e){
+              console.log(e)
+                if(e.code==1000){
+                  layer.msg('操作成功')
+                  location.reload();
+                }else{
+                    layer.msg(e.msg)
+                  }
+             }
+        });
+      }
+
+    </script>
+  </body>
+
+</html>

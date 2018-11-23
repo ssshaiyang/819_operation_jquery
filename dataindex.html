@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>我的桌面---医生数据</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="css/doector-details.css"> -->
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+  .datalist{
+    display: flex;
+    justify-content: space-around;
+    table-layout: fixed;
+    width: 90%;
+    min-width: 450px;
+    margin-top:20%;
+  }
+  .dataitem{
+    display: ;
+    width: 150px;
+    height: 150px;
+    background-color: #009688;
+    text-align: center;
+    color: #fff;
+    border-radius: 50%;
+    cursor:pointer;
+  }
+  .dataitem h3{
+    margin-top: 60px;
+    font-size: 20px;
+  }
+    .dataitem p{
+      margin-top: 10px;
+    font-size: 15px;
+
+  }
+</style>
+<body>
+    <div class="datalist">
+        <div onclick="x_admin_show('查看详情','./datashow.html')" class="dataitem">
+            <h3>医生注册总人数</h3>
+            <p id="doctorNum"></p>
+        </div>
+        <div onclick="x_admin_show('查看详情','./patient-data.html')" class="dataitem">
+            <h3>平台总问诊数</h3>
+            <p id="inquisitionNum"></p>
+        </div>
+        <div onclick="x_admin_show('查看详情','./patient-data.html')" class="dataitem">
+            <h3>用户注册总人数</h3>
+            <p id="patientNum"></p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    $.ajax({
+        url:URL+"/home/getPeopleCount",
+        dataType:'json',
+        async:true,
+        data:{
+        },
+        type:'GET',
+        success:function(data){
+            
+            if(data.code!=1000){
+                layer.msg(data.msg);
+            }else{
+                $('#doctorNum').html(data.data.doctorNum)
+                $('#patientNum').html(data.data.patientNum)
+                $('#inquisitionNum').html(data.data.inquisitionNum)
+            }                      
+        }
+    })
+</script>
+</html>

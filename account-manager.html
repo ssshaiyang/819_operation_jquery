@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <meta charset="UTF-8">
+    <title>账目管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+      <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <style type="text/css">
+    .money-text div{
+      font-family: "PingFangSC-Regular", "PingFang SC";
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    .x-body{
+      margin: 30px 30px;
+    }
+  </style>
+  <body>
+    <div class="x-body money-text">
+        <div>当月共需支付:<span id="totalMoney"></span>元</div>
+        <div>线下合约需支付:<span id="underMoney"></span>元</div>
+        <div>线上合约需支付:<span id="onMoney"></span>元</div>
+        <div>本月问诊营收:<span id="inquisitionMoney"></span>元</div>
+        <div>本月打赏金额:<span id="rewardMoney"></span>元</div>
+        <button class="layui-btn" onclick="somemonthexport()">当月明细账目导出</button>
+        <button class="layui-btn" onclick="historymonthexport()">历史明细账目导出</button>
+    </div>
+    <script>
+      var historymonth =0;
+      layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#start' //指定元素
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#end' //指定元素
+        });
+      });
+      $.ajax({
+        url:URL+"/capital/accounts",
+        dataType:'json',
+        async:true,
+        data:{
+        },
+        type:'GET',
+        success:function(data){
+            // 打赏所得金额
+          if(data.data.rewardMoney==null){
+            $('#rewardMoney').html('0')
+          }else{
+            $('#rewardMoney').html(data.data.rewardMoney)
+          }
+            // 本月问诊所得金额
+          if(data.data.inquisitionMoney==null){
+            $('#inquisitionMoney').html('0')
+          }else{
+            $('#inquisitionMoney').html(data.data.inquisitionMoney)
+          }
+          // 线下合约所得金额
+          if(data.data.underMoney==null){
+            $('#underMoney').html('0')
+          }else{
+            $('#underMoney').html(data.data.underMoney)
+          }
+            // 线上合约所得金额
+          if(data.data.onMoney==null){
+            $('#onMoney').html('0')
+          }else{
+            $('#onMoney').html(data.data.onMoney)
+          }
+            // 所得总金额
+          if(data.data.totalMoney==null){
+            $('#totalMoney').html('0')
+          }else{
+            $('#totalMoney').html(data.data.totalMoney)
+          }                            
+        }
+      })
+      function somemonthexport(){
+         var date=new Date;
+          var year=date.getFullYear(); 
+          var month=date.getMonth()+1;
+          month =(month<10 ? "0"+month:month); 
+          var mydate = (year.toString()+'-'+month.toString());
+          var urls = URL+'/capital/export';
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', urls, true); 
+          xhr.setRequestHeader('Authorization',localStorage.getItem("token"));
+          xhr.responseType = "blob";  
+          xhr.onload = function () {   
+              if (this.status === 200) { 
+                    var blob = this.response; 
+                    var reader = new FileReader();    
+                    reader.readAsDataURL(blob);
+                    reader.onload = function (e) {       
+                       var a = document.createElement('a');           
+                       a.download = mydate+'.xlsx';            
+                       a.href = e.target.result;             
+                       $("body").append(a);    
+                       a.click();               
+                       $(a).remove();            
+                    }
+                    layer.msg('明细导出成功')    
+                }   
+              };    
+              xhr.send()
+      }
+      function historymonthexport(){
+        var strs = '<div><div>请选择月份:</div><input type="text" class="layui-input" id="testlist"></div>';
+          layer.confirm(strs, {btn: ['确认', '取消'], title: "提示"}, function () {
+            console.log(historymonth)
+            if (historymonth==0) {
+                alert('月份未选择');
+            }else{
+                 var urls = URL+'/capital/export?date='+historymonth;
+                  var xhr = new XMLHttpRequest();
+                  xhr.open('GET', urls, true); 
+                  xhr.setRequestHeader('Authorization',localStorage.getItem("token"));
+                  xhr.responseType = "blob";  
+                  xhr.onload = function () {   
+                      if (this.status === 200) { 
+                            var blob = this.response; 
+                            var reader = new FileReader();    
+                            reader.readAsDataURL(blob);
+                            reader.onload = function (e) {       
+                               var a = document.createElement('a');           
+                               a.download = ''+historymonth+'.xlsx';            
+                               a.href = e.target.result;             
+                               $("body").append(a);    
+                               a.click();               
+                               $(a).remove();  
+                                historymonth=0;          
+                            }
+                            layer.msg('明细导出成功')      
+                        }   
+                      };    
+                      xhr.send()
+            }
+        })
+          layui.use('laydate', function(){
+            var laydate = layui.laydate;
+            
+            //执行一个laydate实例
+            laydate.render({
+              elem: '#testlist' //指定元素
+              ,type: 'month'
+              ,change: function(value, date){ //监听日期被切换
+                lay('#testView').html(value);
+                historymonth=value
+                console.log(value)
+              }
+            });
+          });
+      }
+    </script>
+  </body>
+
+</html>

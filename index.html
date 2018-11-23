@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>819--运营端</title>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+	<link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+
+</head>
+<style>
+    #header_time{
+        line-height: 45px;
+        font-size: 12px;
+        margin-left: 25px;
+    }
+</style>
+<body>
+    <!-- 顶部开始 -->
+    <div class="container">
+        <div class="logo"><a href="./index.html">819运营端</a></div>
+        <!-- <div class="left_open">
+            <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+        </div>
+        <ul class="layui-nav left fast-add" lay-filter="">
+          <li class="layui-nav-item">
+            <a href="javascript:;">+新增</a>
+            <dl class="layui-nav-child"> 
+              <dd><a onclick="x_admin_show('资讯','http://www.baidu.com')"><i class="iconfont">&#xe6a2;</i>资讯</a></dd>
+              <dd><a onclick="x_admin_show('图片','http://www.baidu.com')"><i class="iconfont">&#xe6a8;</i>图片</a></dd>
+               <dd><a onclick="x_admin_show('用户','http://www.baidu.com')"><i class="iconfont">&#xe6b8;</i>用户</a></dd>
+            </dl>
+          </li>
+        </ul> -->
+        <ul class="layui-nav right" lay-filter="">
+          <li class="layui-nav-item">
+            <a class="username" href="javascript:;"></a>
+            <dl class="layui-nav-child"> <!-- 二级菜单 -->
+              <dd><a onclick="x_admin_show('切换帐号','modify-password.html')">修改密码</a></dd>
+              <dd><a onclick="logout()">退出</a></dd>
+            </dl>
+          </li>
+          <span class="" id="header_time"></span>
+        </ul>
+        
+    </div>
+    <!-- 顶部结束 -->
+    <!-- 中部开始 -->
+     <!-- 左侧菜单开始 -->
+    <div class="left-nav">
+      <div id="side-nav">
+        <ul id="nav">
+            <li>
+                <a _href="doctor-examine.html">
+                    <i class="iconfont">&#xe6b8;</i>
+                    <cite>审核管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe723;</i>
+                    <cite>用户管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="doctor-manager.html">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>医生用户管理</cite>
+                        </a>
+                    </li >
+                    <li>
+                        <a _href="patient-list.html">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>患者用户管理</cite>
+                        </a>
+                    </li >
+                </ul>
+            </li>
+            <li>
+                <a _href="account-manager.html">
+                    <i class="iconfont">&#xe723;</i>
+                    <cite _href="order-list.html">账目管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe723;</i>
+                    <cite>系统管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="user-adminstration.html">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>账号管理</cite>
+                        </a>
+                    </li >
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont">&#xe70b;</i>
+                            <cite>内容系统管理</cite>
+                            <i class="iconfont nav_right">&#xe697;</i>
+                        </a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a _href="consultation-administration.html">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>资讯管理</cite>
+                                </a>
+                            </li >
+                            <li class="contentmodel">
+                                <a _href="javascript:;" onclick="alert('该功能暂未上线')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>功能数据展现</cite>
+                                </a>
+                            </li>
+                            <li class="contentmodel">
+                                <a _href="section-data.html">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>科室数据展现</cite>
+                                </a>
+                            </li>
+                            <li class="contentmodel"> 
+                                <a _href="first-department.html">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>内容管理</cite>
+                                </a>
+                            </li>
+                            <li class="contentmodel">
+                                <a _href="protocol_management.html">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>协议管理</cite>
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                </ul>
+
+              
+            </li>
+            
+        </ul>
+      </div>
+    </div>
+    <!-- <div class="x-slide_left"></div> -->
+    <!-- 左侧菜单结束 -->
+    <!-- 右侧主体开始 -->
+    <div class="page-content">
+        <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+          <ul class="layui-tab-title">
+            <li class="home"><i class="layui-icon">&#xe68e;</i>首页</li>
+          </ul>
+          <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src='./dataindex.html' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="page-content-bg"></div>
+    <!-- 右侧主体结束 -->
+    <!-- 中部结束 -->
+    <!-- 底部开始 -->
+   <!--  <div class="footer">
+        <div class="copyright">Copyright ©2017 x-admin v2.3 All Rights Reserved</div>  
+    </div> -->
+    <!-- 底部结束 -->
+
+</body>
+<script>
+    function logout(){
+        console.log('logout')
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('rid');
+        location.href = './login.html'
+    }
+    $(document).ready(function() {
+    var username = localStorage.getItem('username')
+    $(".username").text(username);
+
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        if (second >= 0 && second <= 9) {
+            second = "0" + second;
+        }
+        if (minute >= 0 && minute <= 9) {
+            minute = "0" + minute;
+        }
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+                + " " + date.getHours() + seperator2 + minute
+                + seperator2 + second;
+        $("#header_time").text(currentdate)
+    }
+    getNowFormatDate();
+    setInterval(getNowFormatDate, 1000);
+    authList = []
+    $("cite").each(function(){
+       authList.push( $(this).text())
+    })
+    console.log(authList)
+    Array.prototype.remove = function(val) { 
+        var index = this.indexOf(val); 
+        if (index > -1) { 
+        this.splice(index, 1); 
+        } 
+    };
+    $.ajax({
+        type:'GET',
+        async:false,
+        url:URL+'/account/authList',
+        success:function(e){
+            console.log(e)
+            if (e.code == 1000) {
+                initauthList = e.data;
+                initauthList.map(function(item){
+                   // for(let i = 0;i<authList.length;i++){
+                       // if (item.subModuleName == authList[i]) {
+                    $("cite").each(function(){
+                      if( item.subModuleName == $(this).text()){
+                        console.log( $(this).text())
+                        authList.remove($(this).text())
+                        if (item.subModuleName == '内容管理') {
+                            authList.remove('功能数据展现')
+                            authList.remove('科室数据展现')
+                            authList.remove('协议管理')
+                            authList.remove('内容管理')
+                        }
+                      }
+                    })
+                    if ((authList.indexOf("用户管理") >0 && authList.indexOf("医生用户管理") <0) || (authList.indexOf("用户管理") >0 && authList.indexOf("患者用户管理") <0)) {
+                        authList.remove("用户管理")
+                    }
+                     if ((authList.indexOf("系统管理") >0 && authList.indexOf("账号管理") <0) || (authList.indexOf("系统管理") >0 && authList.indexOf("内容管理") <0)) {
+                        authList.remove("系统管理")
+                    }
+                    authList.remove("内容系统管理")
+                    // if ((authList.indexOf("用户管理") >0 && authList.indexOf("医生用户管理") <0) || (authList.indexOf("用户管理") >0 && authList.indexOf("患者用户管理") <0)) {
+                    //     authList.remove("用户管理")
+                    // }
+                       // }
+                   // }
+                })
+            }else{
+                if (e.code == 1002) {
+                    location.href = './login.html'
+                }
+            }
+        }
+    })
+    $("cite").each(function(){//此时的authList为应该删除的authList
+        console.log(authList)
+        let citeitem = $(this).text();
+        let that  = $(this)
+        console.log("*************"+citeitem)
+        authList.map(function(item){
+           console.log("----------"+citeitem)
+            console.log(item)
+            if (item == '内容管理') {
+                console.log('item ==')
+                $(".contentmodel").remove()
+            }
+           else if (item == citeitem) {
+           console.log('item == $(this).text()')
+            that.parent().parent().remove()
+           } 
+        })
+    })
+  //  $("cite").eq(0).parent().parent().html().remove()
+})
+</script>
+</html>

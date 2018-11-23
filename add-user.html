@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+</head>
+<style type="text/css">
+.layui-table img{
+    width: 30%;
+}
+.formbox{
+  width: 40%;
+  margin: 20px auto;
+}
+</style>
+<body>
+    <form class="layui-form formbox" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">登录名</label>
+            <div class="layui-input-inline">
+                <input type="text" name="username" required lay-verify="required" placeholder="请输入登录名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-inline">
+                <input type="text"  name="nickname" required lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系方式</label>
+            <div class="layui-input-inline">
+                <input type="text" name="phone" required lay-verify="required" placeholder="请输入联系方式" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <input type="password" id="password" name="password" required lay-verify="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">重复密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="renewpassword" required lay-verify="renewpassword" placeholder="请再次输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+         <div style="margin-left: 110px;width: 190px;margin-bottom: 20px" class="layui-input-inline">
+            <select name="jurisdiction" id="jurisdiction">
+              <!-- <option value="1">普通</option>
+              <option value="2">VIP</option> -->
+            </select>
+          </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">确定</button>
+                <button type="reset" class="layui-btn layui-btn-primary" onclick="x_admin_close()">取消</button>
+            </div>
+        </div>
+    </form>
+</body>
+<script>
+//Demo
+$.ajax({
+        type:'GET',
+        url:URL+'/account/roleList',
+        data:{
+        },
+        success:function(e){
+            console.log(e)
+            for(var i =0;i<e.data.length;i++){
+              var arrid = i+1;
+              $("#jurisdiction").append('<option value="'+e.data[i].rid+'">'+e.data[i].name+'</option>')
+              layui.use('form', function(){
+                 var form = layui.form;//高版本建议把括号去掉，有的低版本，需要加()
+                 form.render();
+                 });
+            }
+        }
+    });
+layui.use('form', function(){
+  var form = layui.form;
+  form.verify({
+    renewpassword:function(value,item){
+        if(value !== $("#password").val()){
+          return '两次密码不一致';
+        }
+        if(value.length <6){
+          return '密码不能小于6位';
+        }
+    },
+   password:function(value,item){
+        
+        if(value.length <6){
+          return '密码不能小于6位';
+        }
+    }
+  })
+  //监听提交
+  form.on('submit(formDemo)', function(fromdata){
+    // console.log(fromdata);
+    // var token = localStorage.getItem("token");
+    // console.log(token)
+   $.ajax({
+        dataType: "json",
+        async: false,
+        type:'POST',
+        url:URL+'/account/user/create',
+        data:{
+          username:fromdata.field.username,
+          password:fromdata.field.password,
+          phone:fromdata.field.phone,
+          nickname:fromdata.field.nickname,
+          rid:fromdata.field.jurisdiction,
+        },
+        success:function(e){
+            if(e.code==1000){
+               layer.msg('已添加!',{icon:1,time:1000});  
+               x_admin_close();
+               return false;             
+            }else{
+              layer.msg(e.msg)
+            }
+        }
+    });
+  });
+});
+</script>
+</html>

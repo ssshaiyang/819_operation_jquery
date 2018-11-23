@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="./css/xadmin.css">
+    <script type="text/javascript" src="./js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/webconfig.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/doector-details.css">
+</head>
+<style>
+.register_doctor_select {
+    vertical-align: bottom;
+}
+
+.register_doctor_table {
+    margin: 0 auto;
+}
+
+.register_doctor {
+    text-align: center;
+}
+
+.pie_chart {
+    display: flex;
+    justify-content: space-around;
+}
+</style>
+
+<body style="height: 100%; margin: 0">
+    <div class="date_show_list">
+        <div class="register_doctor">
+            <h2>注册医生数量</h2>
+            <div class="register_doctor_botton layui-input-inline">
+                <select name="year_select" class="register_doctor_year register_doctor_select" id="yearSelect">
+                    <option value="2018">2018</option>
+                    <option value="2019">2019</option>
+                </select>
+                <select name="hospital_select" class="register_doctor_year register_doctor_select" id="hospitalSelect">
+                    <option value="三甲">三甲</option>
+                    <option value="其他">其他</option>
+                </select>
+
+            </div>
+            <div id="register_doctor_table" style="width: 800px;height:400px; margin:0 auto;"></div>
+        </div>
+        <div class="pie_chart">
+            <div id="pie_chart_1" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+            <div id="pie_chart_2" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+            <div id="pie_chart_3" style="width: 350px;height:400px; margin:0 auto;">
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+<script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+<script type="text/javascript">
+function getDoctorData(year,hospitalClass){
+$.ajax({
+    type:'GET',
+    async:false, 
+    data:{
+        year:year,
+        hospitalClass:hospitalClass
+    },
+    url:URL+'/home/getDoctorCount',
+    success:function(e){
+        if (e.code == 1000) {
+            month = [];
+            doctorNum = [];
+            doctorlist = e.data
+            e.data.map(function(item){
+                month.push(item.month);
+                doctorNum.push(item.doctorNum);
+            })
+            console.log(month)
+            console.log(doctorNum)
+        }else{
+            layui.use('layer', function(){
+              var layer = layui.layer;
+              
+              layer.msg(e.msg,{icon:2,time:2000})
+              return false;
+            }); 
+            
+        }
+    }
+   })
+
+$.ajax({
+    type:'GET',
+    async:false, 
+    data:{
+        year:year,
+        hospitalClass:hospitalClass
+    },
+    url:URL+'/home/getDoctorData',
+    success:function(e){
+        if (e.code == 1000) {
+            var chart_1 = e.data.doctorClass;
+            var chart_2 = e.data.sign;
+            var chart_3 = e.data.department;
+            chart_1_title = [];
+            chart_1_value = [];
+            chart_1_all = [];
+            chart_1.map(function(item){
+                chart_1_title.push(item.docClass);
+                chart_1_value.push(item.proportion);
+                let chart_1_all_item = {
+                    value:item.proportion,
+                    name:item.docClass
+                } 
+                chart_1_all.push(chart_1_all_item)
+
+            })
+            console.log(chart_1_all)
+            chart_2_title = [];
+            chart_2_value = [];
+            chart_2_all = [];
+            chart_2.map(function(item){
+                chart_2_title.push(item.docClass);
+                chart_2_value.push(item.proportion);
+                let chart_2_all_item = {
+                    value:item.proportion,
+                    name:item.docClass
+                } 
+                chart_2_all.push(chart_2_all_item)
+            })
+            chart_3_title = [];
+            chart_3_value = [];
+            chart_3_all = [];
+            chart_3.map(function(item){
+                console.log(item.departmentName)
+                chart_3_title.push(item.departmentName);
+                chart_3_value.push(item.proportion);
+                let chart_3_all_item = {
+                    value:item.proportion,
+                    name:item.departmentName
+                } 
+                chart_3_all.push(chart_3_all_item)
+            })
+        }else{
+            layui.use('layer', function(){
+              var layer = layui.layer;
+              
+              layer.msg(e.msg,{icon:2,time:2000})
+              return false;
+            }); 
+            
+        }
+    }
+})
+var dom = document.getElementById("register_doctor_table");
+var myChart = echarts.init(dom);
+var app = {};
+option = null;
+option = {
+    xAxis: {
+        type: 'category',
+        data: month
+    },
+    yAxis: {
+        type: 'value'
+    },
+    series: [{
+        data: doctorNum,
+        type: 'line'
+    }]
+};;
+if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+
+console.log(chart_1_all)
+var chart_1_dom = document.getElementById("pie_chart_1");
+var chart_1_myChart = echarts.init(chart_1_dom);
+var chart_1_app = {};
+chart_1_option = null;
+chart_1_option = {
+    title: {
+        text: '各类医生占比',
+        x: 'center'
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        bottom: 0,
+        orient: 'horizontal',
+        data: chart_1_title
+    },
+    series: [{
+        name: '访问来源',
+        type: 'pie',
+        radius: '55%',
+        center: ['50%', '60%'],
+        data: chart_1_all,
+        itemStyle: {
+            emphasis: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+        }
+    }]
+};;
+if (chart_1_option && typeof chart_1_option === "object") {
+    chart_1_myChart.setOption(chart_1_option, true);
+}
+var chart_2_dom = document.getElementById("pie_chart_2");
+var chart_2_myChart = echarts.init(chart_2_dom);
+var chart_2_app = {};
+chart_2_option = null;
+chart_2_option = {
+    title: {
+        text: '签约占比',
+        x: 'center'
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        bottom: 0,
+        orient: 'horizontal',
+        data: chart_2_title
+    },
+    series: [{
+        name: '访问来源',
+        type: 'pie',
+        radius: '55%',
+        center: ['50%', '60%'],
+        data: chart_2_all,
+        itemStyle: {
+            emphasis: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+        }
+    }]
+};
+if (chart_2_option && typeof chart_2_option === "object") {
+    chart_2_myChart.setOption(chart_2_option, true);
+}
+ console.log(chart_3_title)
+var chart_3_dom = document.getElementById("pie_chart_3");
+var chart_3_myChart = echarts.init(chart_3_dom);
+var chart_3_app = {};
+chart_3_option = null;
+chart_3_option = {
+    title: {
+        text: '各类科室医生占比',
+        x: 'center'
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        bottom: 0,
+        orient: 'horizontal',
+        data: chart_3_title
+    },
+    series: [{
+        name: '访问来源',
+        type: 'pie',
+        radius: '55%',
+        center: ['50%', '60%'],
+        data: chart_3_all,
+        itemStyle: {
+            emphasis: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+        }
+    }]
+};;
+if (chart_3_option && typeof chart_3_option === "object") {
+    chart_3_myChart.setOption(chart_3_option, true);
+}
+}
+year = 2018;
+hospitalClass = '三甲'
+getDoctorData(year,hospitalClass)
+</script>
+<script>
+    $(document).ready(function(){
+    $('#yearSelect').change(function(){
+        console.log($(this).children('option:selected').val());
+        year=$(this).children('option:selected').val();
+        getDoctorData(year,hospitalClass);
+    })
+    $('#hospitalSelect').change(function(){
+        console.log($(this).children('option:selected').val());
+        hospitalClass=$(this).children('option:selected').val();
+        getDoctorData(year,hospitalClass);
+    })
+})
+
+</script>
+</html>
